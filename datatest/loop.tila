@@ -1,0 +1,8 @@
+begin
+    int x = 10;
+    while x do
+        begin
+            x = x - 1;
+            print x;
+        end;
+end

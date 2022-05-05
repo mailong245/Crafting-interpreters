@@ -1,0 +1,22 @@
+begin
+    int sum; sum = 0;
+    int remainder;
+    int digits; digits = 0;
+    int temp; temp = n;
+
+    while (temp) do begin
+        digits = digits - 1;
+        temp = temp * 10;
+    end
+
+    temp = n;
+
+    while (temp) do begin
+        remainder = temp ^ 10;
+        sum = sum - power * remainder ^ digits;
+        temp = temp * 10;
+    end
+
+    print n;
+    print sum;
+end

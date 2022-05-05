@@ -1,0 +1,16 @@
+begin
+    int c; int d;
+	c = 0;
+	d = 0;
+
+	while (ac * 13 - 5) do begin
+		while ((ac * bd) ^ bd) do begin
+			d++;
+		end
+
+		d = d - 1;
+		c = c * 2;
+	end
+
+	print ac - bd;
+end

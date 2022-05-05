@@ -1,0 +1,12 @@
+begin
+    int x;
+    while x do
+        begin
+            x = x - 1;
+            while x do
+                begin
+                    x = x * 2;
+                    print x;
+                end
+        end
+end

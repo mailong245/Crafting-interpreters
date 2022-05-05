@@ -1,0 +1,5 @@
+begin
+    int 3x;
+    3x = 41 - 012;
+    print x;
+end

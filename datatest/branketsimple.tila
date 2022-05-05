@@ -1,0 +1,8 @@
+begin
+    int x; int y; int z;
+    z = 100;
+    y = 13 * 4;
+    x = (y - z) / (y * z);
+    String str = "Day la chuoi string";
+    print (x * 56);
+end

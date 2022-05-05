@@ -1,0 +1,5 @@
+begin
+    int;
+    x = 41 + 10;
+    print x;
+end

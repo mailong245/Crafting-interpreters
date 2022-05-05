@@ -1,0 +1,7 @@
+begin
+    int x; int y; int z;
+    z = 100;
+    y = 13 * 4;
+    x = ((y - z) ^ (y * z);
+    print (x * 56);
+end
