@@ -80,7 +80,7 @@ public abstract class Stmt {
     final Expr initializer;
   }
   static class While extends Stmt {
-    While(Expr condition, Stmt body) {
+    While(Expr condition, List<Stmt> body) {
       this.condition = condition;
       this.body = body;
     }
@@ -91,7 +91,7 @@ public abstract class Stmt {
     }
 
     final Expr condition;
-    final Stmt body;
+    final List<Stmt> body;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

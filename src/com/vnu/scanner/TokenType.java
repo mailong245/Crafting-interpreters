@@ -3,6 +3,7 @@ package com.vnu.scanner;
 public enum TokenType {
     PROGRAM, STATEMENTS, STATEMENT, DECL, TYPE,
     ASSIGMENT, EXP, LOOP, ID,
+    START_WHILE, END_WHILE,
 
     DO,
     BANG, BANG_EQUAL,

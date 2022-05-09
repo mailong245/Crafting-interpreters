@@ -17,27 +17,28 @@ public class Scanner {
     private int current = 0;
     private int line = 1;
     private static final Map<String, TokenType> keywords;
+    private boolean whileCheck = false;
 
     static {
         keywords = new HashMap<>();
-        keywords.put("and",    AND);
-        keywords.put("class",  CLASS);
-        keywords.put("else",   ELSE);
-        keywords.put("false",  FALSE);
-        keywords.put("for",    FOR);
-        keywords.put("if",     IF);
-        keywords.put("or",     OR);
-        keywords.put("print",  PRINT);
+        keywords.put("and", AND);
+        keywords.put("class", CLASS);
+        keywords.put("else", ELSE);
+        keywords.put("false", FALSE);
+        keywords.put("for", FOR);
+        keywords.put("if", IF);
+        keywords.put("or", OR);
+        keywords.put("print", PRINT);
         keywords.put("return", RETURN);
-        keywords.put("this",   THIS);
-        keywords.put("true",   TRUE);
-        keywords.put("var",    VAR);
-        keywords.put("while",  WHILE);
-        keywords.put("int",    TYPE);
+        keywords.put("this", THIS);
+        keywords.put("true", TRUE);
+        keywords.put("var", VAR);
+        keywords.put("while", WHILE);
+        keywords.put("int", TYPE);
         keywords.put("String", TYPE);
-        keywords.put("do",     DO);
-        keywords.put("begin",  PROGRAM);
-        keywords.put("end",    PROGRAM);
+        keywords.put("do", DO);
+        keywords.put("begin", PROGRAM);
+        keywords.put("end", PROGRAM);
     }
 
     public Scanner(String source) {
@@ -57,21 +58,51 @@ public class Scanner {
     private void scanToken() {
         char c = advance();
         switch (c) {
-            case '(': addToken(LEFT_PAREN); break;
-            case ')': addToken(RIGHT_PAREN); break;
-            case '{': addToken(LEFT_BRACE); break;
-            case '}': addToken(RIGHT_BRACE); break;
-            case ',': addToken(COMMA); break;
-            case '.': addToken(DOT); break;
-            case '-': addToken(MINUS); break;
-            case '+': addToken(PLUS); break;
-            case ';': addToken(SEMICOLON); break;
-            case '*': addToken(STAR); break;
-            case '!': addToken(match('=') ? NOT_EQUAL : NOT); break;
-            case '=': addToken(match('=') ? EQUAL_EQUAL : EQUAL); break;
-            case '<': addToken(match('=') ? LESS_EQUAL : LESS); break;
-            case '>': addToken(match('=') ? GREATER_EQUAL : GREATER); break;
-            case '^': addToken(POWER); break;
+            case '(':
+                addToken(LEFT_PAREN);
+                break;
+            case ')':
+                addToken(RIGHT_PAREN);
+                break;
+            case '{':
+                addToken(LEFT_BRACE);
+                break;
+            case '}':
+                addToken(RIGHT_BRACE);
+                break;
+            case ',':
+                addToken(COMMA);
+                break;
+            case '.':
+                addToken(DOT);
+                break;
+            case '-':
+                addToken(MINUS);
+                break;
+            case '+':
+                addToken(PLUS);
+                break;
+            case ';':
+                addToken(SEMICOLON);
+                break;
+            case '*':
+                addToken(STAR);
+                break;
+            case '!':
+                addToken(match('=') ? NOT_EQUAL : NOT);
+                break;
+            case '=':
+                addToken(match('=') ? EQUAL_EQUAL : EQUAL);
+                break;
+            case '<':
+                addToken(match('=') ? LESS_EQUAL : LESS);
+                break;
+            case '>':
+                addToken(match('=') ? GREATER_EQUAL : GREATER);
+                break;
+            case '^':
+                addToken(POWER);
+                break;
             case '/':
                 if (match('/')) {
                     while (peek() != '\n' && !isAtEnd()) advance();
@@ -79,7 +110,9 @@ public class Scanner {
                     addToken(SLASH);
                 }
                 break;
-            case '\"': string(); break;
+            case '\"':
+                string();
+                break;
             case ' ':
             case '\r':
             case '\t':
@@ -92,7 +125,7 @@ public class Scanner {
                     number();
                 } else if (isAlpha(c)) {
                     identifier();
-                } else{
+                } else {
                     Application.error(line, "Unexpected character.");
                 }
                 break;
@@ -119,8 +152,26 @@ public class Scanner {
 
         String text = source.substring(start, current);
         TokenType type = keywords.get(text);
+
         if (type == null) type = IDENTIFIER;
+        type = whileCheck(text, type);
         addToken(type);
+    }
+
+    private TokenType whileCheck(String text, TokenType type) {
+        if ("while".equalsIgnoreCase(text)) {
+            whileCheck = true;
+        }
+        if (whileCheck) {
+            if ("do".equalsIgnoreCase(text) || "begin".equalsIgnoreCase(text)) {
+                return START_WHILE;
+            }
+            if("end".equalsIgnoreCase(text)){
+                whileCheck = false;
+                return END_WHILE;
+            }
+        }
+        return type;
     }
 
     private char peekNext() {
@@ -191,8 +242,8 @@ public class Scanner {
         tokens.add(new Token(type, text, literal, line));
     }
 
-    private Token getLastToken(){
-        if(tokens.size() > 0){
+    private Token getLastToken() {
+        if (tokens.size() > 0) {
             return tokens.get(tokens.size() - 1);
         }
         return null;

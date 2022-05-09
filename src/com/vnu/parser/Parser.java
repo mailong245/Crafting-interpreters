@@ -58,11 +58,19 @@ public class Parser {
         consume(LEFT_PAREN, "Expect '(' after 'while'.");
         Expr condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after condition.");
-        consume(DO, "Expect 'do' before execute while.");
-        consume(PROGRAM, "Expect 'begin' before execute while.");
-        Stmt body = statement();
+        consume(START_WHILE, "Expect 'do' before execute while.");
+        consume(START_WHILE, "Expect 'begin' before execute while.");
+//        Stmt body = statement();
 
-        return new Stmt.While(condition, body);
+        List<Stmt> statements = new ArrayList<>();
+
+        while (!check(END_WHILE) && !isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        consume(END_WHILE, "Expect 'end' after execute while.");
+
+        return new Stmt.While(condition, statements);
     }
 
     private Stmt ifStatement() {
@@ -99,9 +107,6 @@ public class Parser {
 
     private Stmt expressionStatement() {
         Expr expr = expression();
-        if(check(PROGRAM)){
-            consume(PROGRAM, "Need end");
-        }
         consume(SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
     }
@@ -287,7 +292,7 @@ public class Parser {
 
         while (match(SLASH, STAR)) {
             Token operator = previous();
-            Expr right = unary();
+            Expr right = power();
             expr = new Expr.Binary(expr, operator, right);
         }
 
@@ -301,7 +306,7 @@ public class Parser {
     private Expr power() {
         Expr expr = unary();
 
-        while (match(POWER)) {
+        if (match(POWER)) {
             Token operator = previous();
             Expr right = unary();
             expr = new Expr.Binary(expr, operator, right);

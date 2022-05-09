@@ -6,6 +6,8 @@ import com.vnu.scanner.TokenType;
 
 import java.util.List;
 
+import static com.vnu.scanner.TokenType.PROGRAM;
+
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 //    public void interpret(Expr expression) {
@@ -240,7 +242,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
         while (isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.body);
+            for(Stmt body: stmt.body){
+                execute(body);
+            }
         }
         return null;
     }
