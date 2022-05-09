@@ -35,6 +35,7 @@ public class Scanner {
         keywords.put("while",  WHILE);
         keywords.put("int",    TYPE);
         keywords.put("String", TYPE);
+        keywords.put("do",     DO);
         keywords.put("begin",  PROGRAM);
         keywords.put("end",    PROGRAM);
     }
@@ -70,6 +71,7 @@ public class Scanner {
             case '=': addToken(match('=') ? EQUAL_EQUAL : EQUAL); break;
             case '<': addToken(match('=') ? LESS_EQUAL : LESS); break;
             case '>': addToken(match('=') ? GREATER_EQUAL : GREATER); break;
+            case '^': addToken(POWER); break;
             case '/':
                 if (match('/')) {
                     while (peek() != '\n' && !isAtEnd()) advance();
@@ -117,12 +119,6 @@ public class Scanner {
 
         String text = source.substring(start, current);
         TokenType type = keywords.get(text);
-//        if (getLastToken() != null && getLastToken().type.name().equalsIgnoreCase(TYPE.name())){
-//            type = ID;
-//            addToken(type);
-//            return;
-//        }
-//        if (type == null) type = STATEMENT;
         if (type == null) type = IDENTIFIER;
         addToken(type);
     }

@@ -46,10 +46,37 @@ public class Parser {
     }
 
     private Stmt statement() {
+        if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
+        if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt whileStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'while'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after condition.");
+        consume(DO, "Expect 'do' before execute while.");
+        consume(PROGRAM, "Expect 'begin' before execute while.");
+        Stmt body = statement();
+
+        return new Stmt.While(condition, body);
+    }
+
+    private Stmt ifStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+        if (match(ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
     private Stmt printStatement() {
@@ -72,6 +99,9 @@ public class Parser {
 
     private Stmt expressionStatement() {
         Expr expr = expression();
+        if(check(PROGRAM)){
+            consume(PROGRAM, "Need end");
+        }
         consume(SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
     }
@@ -88,7 +118,7 @@ public class Parser {
     }
 
     private Expr assignment() {
-        Expr expr = equality();
+        Expr expr = or();
 
         if (match(EQUAL)) {
             Token equals = previous();
@@ -105,10 +135,38 @@ public class Parser {
         return expr;
     }
 
+    private Expr or() {
+        Expr expr = and();
+
+        while (match(OR)) {
+            Token operator = previous();
+            Expr right = and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr and() {
+        Expr expr = equality();
+
+        while (match(AND)) {
+            Token operator = previous();
+            Expr right = equality();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
     private Expr expression() {
         return assignment();
     }
 
+    /***
+     * Kiểm tra xem có phải phép so sánh "bằng hoặc khác" hay không
+     * @return
+     */
     private Expr equality() {
         Expr expr = comparison();
 
@@ -153,10 +211,6 @@ public class Parser {
         return peek().getType() == EOF;
     }
 
-    private boolean isProgram() {
-        return peek().getType() == PROGRAM;
-    }
-
     private Token peek() {
         return tokens.get(current);
     }
@@ -192,6 +246,10 @@ public class Parser {
         }
     }
 
+    /***
+     * Kiểm tra xem Expr có phép so sánh "lớn hơn bé hơn" hay không
+     * @return
+     */
     private Expr comparison() {
         Expr expr = term();
 
@@ -204,6 +262,10 @@ public class Parser {
         return expr;
     }
 
+    /***
+     * Kiểm tra xem Expr có phép "+ -" hay không
+     * @return
+     */
     private Expr term() {
         Expr expr = factor();
 
@@ -216,8 +278,12 @@ public class Parser {
         return expr;
     }
 
+    /***
+     * kiểm tra xem Expr có phép "* /" không
+     * @return
+     */
     private Expr factor() {
-        Expr expr = unary();
+        Expr expr = power();
 
         while (match(SLASH, STAR)) {
             Token operator = previous();
@@ -228,13 +294,29 @@ public class Parser {
         return expr;
     }
 
+    /***
+     * Kiểm tra xem Expr có phép ^ hay không
+     * @return
+     */
+    private Expr power() {
+        Expr expr = unary();
+
+        while (match(POWER)) {
+            Token operator = previous();
+            Expr right = unary();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+
     private Expr unary() {
         if (match(BANG, MINUS)) {
             Token operator = previous();
             Expr right = unary();
             return new Expr.Unary(operator, right);
         }
-
         return primary();
     }
 

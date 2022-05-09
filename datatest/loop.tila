@@ -1,4 +1,4 @@
-begin
+    begin
     int x = 10;
     while x do
         begin

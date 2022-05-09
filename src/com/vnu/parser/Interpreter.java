@@ -2,6 +2,7 @@ package com.vnu.parser;
 
 import com.vnu.Application;
 import com.vnu.scanner.Token;
+import com.vnu.scanner.TokenType;
 
 import java.util.List;
 
@@ -78,6 +79,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             case STAR:
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left * (double) right;
+            case POWER:
+                checkNumberOperands(expr.operator, left, right);
+                return (double) Math.pow((double) left, (double) right);
             case BANG_EQUAL:
                 return !isEqual(left, right);
             case EQUAL_EQUAL:
@@ -97,6 +101,20 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Object visitLiteralExpr(Expr.Literal expr) {
         return expr.value;
     }
+
+    @Override
+    public Object visitLogicalExpr(Expr.Logical expr) {
+        Object left = evaluate(expr.left);
+
+        if (expr.operator.getType() == TokenType.OR) {
+            if (isTruthy(left)) return left;
+        } else {
+            if (!isTruthy(left)) return left;
+        }
+
+        return evaluate(expr.right);
+    }
+
 
     @Override
     public Object visitUnaryExpr(Expr.Unary expr) {
@@ -170,6 +188,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitIfStmt(Stmt.If stmt) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch);
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch);
+        }
+        return null;
+    }
+
     void executeBlock(List<Stmt> statements,
                       Environment environment) {
         Environment previous = this.environment;
@@ -206,6 +234,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
 
         environment.define(stmt.name.getLexeme(), value);
+        return null;
+    }
+
+    @Override
+    public Void visitWhileStmt(Stmt.While stmt) {
+        while (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.body);
+        }
         return null;
     }
 }
